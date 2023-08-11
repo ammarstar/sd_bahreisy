@@ -17,6 +17,9 @@
       text-align: center;
       padding-top: 50px;
     }
+    .image-wrapper img{
+      width: 200px;
+    }
   </style>
   <body>
 <!-- header -->
@@ -56,6 +59,7 @@
   $id=$_GET['edit'];
   $query=mysqli_query($link, "SELECT * FROM tbl_utama where id='$id' ");
   $outputan=mysqli_fetch_assoc($query);
+  $foto=$outputan['gambar'];
    ?>
   <form method="post" enctype="multipart/form-data">
     <div class="form-group">
@@ -63,6 +67,9 @@
       <input type="text" placeholder="Judul Berita" class="form-control" name="judul" value="<?php echo $outputan['judul'] ?>">
       <label for="isi">Isi Berita</label>
       <textarea name="isi" class="ckeditor form-control" rows="10" style="resize:none;"><?php echo $outputan['isi'] ?></textarea>
+      <div class="image-wrapper">
+        <img src="../tampung/<?php echo $outputan['gambar'] ?>" alt="">
+      </div>
       <input type="text" placeholder="nama gambar" class="mt-3" name="nama_gambar" value="">
       <input type="file" name="gambar" value="">
     </div>
@@ -70,15 +77,31 @@
   </form>
   <?php
     if (isset($_POST['simpan'])) {
-      $perbarui=mysqli_query($link, "UPDATE tbl_utama set judul='".$_POST['judul']."',
-                                                          isi='".$_POST['isi']."' where id='$id' ");
-      if ($perbarui) {
-        header('location:r_index.php');
-        echo "Berhasil Simpan";
+        $name=$_FILES['gambar']['name'];
+        $tmp=$_FILES['gambar']['tmp_name'];
+        $tampung="../tampung/";
+        move_uploaded_file($tmp, $tampung. $name);
+      if ($name) {
+        $name=$_FILES['gambar']['name'];
+        $tmp=$_FILES['gambar']['tmp_name'];
+        $tampung="../tampung/";
+        move_uploaded_file($tmp, $tampung. $name);
+        unlink("../tampung/$foto");
+        $perbarui=mysqli_query($link, "UPDATE tbl_utama set judul='".$_POST['judul']."',
+                                                            isi='".$_POST['isi']."',
+                                                            gambar='$name' where id='$id' ");
       }
       else {
-        echo "Gagal Simpan";
+        $perbarui=mysqli_query($link, "UPDATE tbl_utama set judul='".$_POST['judul']."',
+                                                            isi='".$_POST['isi']."'
+                                                             where id='$id' ");
       }
+      ?>
+      <script type="text/javascript">
+        alert('berhasil merubah data');
+        window.location.href='r_index.php';
+      </script>
+      <?php
     }
    ?>
 </div>
